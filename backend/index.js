@@ -51,28 +51,45 @@ app.post("/addemployee", (req, res) => {
 app.delete("/deleteemployee/:id", (req, res) => {
   const { id } = req.params;
 
-  // Validate the input
   if (!id) {
     return res.status(400).json({ error: "Employee ID is required." });
   }
 
-  // SQL query to delete the employee
-  const deleteEmployeeQuery = "DELETE FROM users WHERE id = ?";
-
+  const deleteEmployeeQuery = "DELETE FROM employee_info WHERE id = ?";
   db.query(deleteEmployeeQuery, [id], (err, result) => {
     if (err) {
-      console.error("Database error:", err); // Log the error for debugging
-      return res
-        .status(500)
-        .json({ error: "An error occurred while deleting the employee." });
+      console.error("Database error:", err);
+      return res.status(500).json({ error: "Failed to delete employee." });
     }
 
-    // Check if any row was deleted
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: "Employee not found." });
     }
 
     res.status(200).json({ message: "Employee deleted successfully!" });
+  });
+});
+app.put("/editemployee/:id", (req, res) => {
+  const { id } = req.params;
+  const { name, position } = req.body;
+
+  if (!name || !position) {
+    return res.status(400).json({ error: "Name and position are required." });
+  }
+
+  const updateEmployeeQuery =
+    "UPDATE employee_info SET name = ?, position = ? WHERE id = ?";
+  db.query(updateEmployeeQuery, [name, position, id], (err, result) => {
+    if (err) {
+      console.error("Database error:", err);
+      return res.status(500).json({ error: "Failed to update employee." });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Employee not found." });
+    }
+
+    res.status(200).json({ message: "Employee updated successfully!" });
   });
 });
 
